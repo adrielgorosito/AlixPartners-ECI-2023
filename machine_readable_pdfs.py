@@ -25,11 +25,12 @@ class MainWindow(QMainWindow):
             texto_encontrado = self.buscar_dato_pdf(file_name, "Palabra")
 
             if texto_encontrado:
+                texto_encontrado = self.obtener_siguiente_palabras(texto_encontrado, 10)
                 self.text_edit.setPlainText(texto_encontrado)
             else:
                 self.text_edit.setPlainText("La palabra ingresada no se encontró en el PDF.")
 
-    def buscar_dato_pdf(self, archivo_pdf, dato_buscado):
+    def buscar_palabra_pdf(self, archivo_pdf, dato_buscado):
         texto_encontrado = ""
         with open(archivo_pdf, 'rb') as archivo:
             lector_pdf = PdfReader(archivo)
@@ -41,6 +42,12 @@ class MainWindow(QMainWindow):
                     texto_encontrado += contenido_pagina
 
         return texto_encontrado
+
+    def obtener_palabras(self, texto, cantidad_palabras):
+        palabras = texto.split()
+        indice_fin = min(cantidad_palabras, len(palabras))
+        palabras_siguientes = palabras[:indice_fin]
+        return ' '.join(palabras_siguientes)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
