@@ -15,39 +15,36 @@ class MainWindow(QMainWindow):
         self.text_edit = QTextEdit(self)
         self.text_edit.setGeometry(50, 120, 300, 150)
 
+        self.resultados = []
+
     def import_pdf(self):
         file_dialog = QFileDialog()
-        file_dialog.setFileMode(QFileDialog.ExistingFile)
+        file_dialog.setFileMode(QFileDialog.ExistingFiles)
         file_dialog.setNameFilter("Archivos PDF (*.pdf)")
         if file_dialog.exec_():
-            file_name = file_dialog.selectedFiles()[0]
+            file_names = file_dialog.selectedFiles()
 
-            texto_encontrado = self.buscar_dato_pdf(file_name, "Palabra")
+            self.resultados = []
+            for file_name in file_names:
+                self.buscar_palabra_pdf(file_name, "Palabra")
 
-            if texto_encontrado:
-                texto_encontrado = self.obtener_siguiente_palabras(texto_encontrado, 10)
-                self.text_edit.setPlainText(texto_encontrado)
+            if self.resultados:
+                self.text_edit.setPlainText(str(self.resultados))
             else:
                 self.text_edit.setPlainText("La palabra ingresada no se encontró en el PDF.")
 
-    def buscar_palabra_pdf(self, archivo_pdf, dato_buscado):
-        texto_encontrado = ""
+    def buscar_palabra_pdf(self, archivo_pdf, palabra_a_buscar):
         with open(archivo_pdf, 'rb') as archivo:
             lector_pdf = PdfReader(archivo)
             num_paginas = len(lector_pdf.pages)
 
             for pagina in range(num_paginas):
                 contenido_pagina = lector_pdf.pages[pagina].extract_text()
-                if dato_buscado in contenido_pagina:
-                    texto_encontrado += contenido_pagina
-
-        return texto_encontrado
-
-    def obtener_palabras(self, texto, cantidad_palabras):
-        palabras = texto.split()
-        indice_fin = min(cantidad_palabras, len(palabras))
-        palabras_siguientes = palabras[:indice_fin]
-        return ' '.join(palabras_siguientes)
+                if palabra_a_buscar in contenido_pagina:
+                    palabras = contenido_pagina.split()
+                    indice_fin = min(len(palabras), palabras.index(palabra_a_buscar) + 11)
+                    palabras_siguientes = palabras[palabras.index(palabra_a_buscar) + 1:indice_fin]
+                    self.resultados.append(' '.join(palabras_siguientes))
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
