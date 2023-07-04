@@ -26,25 +26,43 @@ class MainWindow(QMainWindow):
 
             self.resultados = []
             for file_name in file_names:
-                self.buscar_palabra_pdf(file_name, "Palabra")
+                self.buscar_palabra_pdf(file_name)
 
             if self.resultados:
-                self.text_edit.setPlainText(str(self.resultados))
+                self.text_edit.setPlainText('\n'.join(self.resultados))
             else:
                 self.text_edit.setPlainText("La palabra ingresada no se encontró en el PDF.")
 
-    def buscar_palabra_pdf(self, archivo_pdf, palabra_a_buscar):
+    def buscar_palabra_pdf(self, archivo_pdf):
         with open(archivo_pdf, 'rb') as archivo:
             lector_pdf = PdfReader(archivo)
             num_paginas = len(lector_pdf.pages)
 
+            # Búsqueda del número de factura y del total
+            numero_factura = None
+            total_factura = None
+
             for pagina in range(num_paginas):
                 contenido_pagina = lector_pdf.pages[pagina].extract_text()
-                if palabra_a_buscar in contenido_pagina:
-                    palabras = contenido_pagina.split()
-                    indice_fin = min(len(palabras), palabras.index(palabra_a_buscar) + 11)
-                    palabras_siguientes = palabras[palabras.index(palabra_a_buscar) + 1:indice_fin]
-                    self.resultados.append(' '.join(palabras_siguientes))
+
+                # Cuidado: es case sensitive
+                if numero_factura is None and "Invoice:" in contenido_pagina:
+                    numero_factura = self.obtener_siguiente_palabras(contenido_pagina, "Invoice:", 1)
+
+                if total_factura is None and "Total:" in contenido_pagina:
+                    total_factura = self.obtener_siguiente_palabras(contenido_pagina, "Total:", 1)
+
+                if numero_factura and total_factura:
+                    self.resultados.append(f"{numero_factura};{total_factura}")
+                    break
+                    # Si se desea saber el nombre del PDF: self.resultados.append(f"{archivo_pdf};{numero_factura};{total_factura}")
+
+    def obtener_siguiente_palabras(self, texto, palabra_buscada, cantidad_palabras):
+        palabras = texto.split()
+        indice_palabra_buscada = palabras.index(palabra_buscada)
+        indice_fin = min(indice_palabra_buscada + cantidad_palabras + 1, len(palabras))
+        palabras_siguientes = palabras[indice_palabra_buscada + 1:indice_fin]
+        return ' '.join(palabras_siguientes)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
