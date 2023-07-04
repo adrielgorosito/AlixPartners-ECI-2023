@@ -1,4 +1,5 @@
 import sys
+import csv
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QFileDialog, QTextEdit
 from PyPDF2 import PdfReader
 
@@ -30,6 +31,7 @@ class MainWindow(QMainWindow):
 
             if self.resultados:
                 self.text_edit.setPlainText('\n'.join(self.resultados))
+                self.guardar_csv()
             else:
                 self.text_edit.setPlainText("La palabra ingresada no se encontró en el PDF.")
 
@@ -63,6 +65,17 @@ class MainWindow(QMainWindow):
         indice_fin = min(indice_palabra_buscada + cantidad_palabras + 1, len(palabras))
         palabras_siguientes = palabras[indice_palabra_buscada + 1:indice_fin]
         return ' '.join(palabras_siguientes)
+
+    def guardar_csv(self):
+        file_dialog = QFileDialog()
+        file_dialog.setDefaultSuffix("csv")
+        file_path, _ = file_dialog.getSaveFileName(self, "Guardar CSV", "", "Archivos CSV (*.csv)")
+        if file_path:
+            with open(file_path, 'w', newline='') as file:
+                writer = csv.writer(file)
+                for resultado in self.resultados:
+                    writer.writerow([resultado])
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
