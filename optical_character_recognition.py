@@ -1,13 +1,19 @@
 import pytesseract
-import cv2
+from pdf2image import convert_from_path
 
 # Configuración de Tesseract OCR
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
 
-image = cv2.imread('img_test.jpg')
-text = pytesseract.image_to_string(image, lang='spa')
-print(text)
+def obtener_texto(pdf_file):
+    images = convert_from_path(pdf_file)
+    final_text = ""
 
-cv2.imshow('Imagen de prueba', image)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    for pg, img in enumerate(images):
+        final_text += pytesseract.image_to_string(img)
+    
+    return final_text
+
+path = 'pdf_test.pdf'
+text = obtener_texto(path)
+
+print(text)
