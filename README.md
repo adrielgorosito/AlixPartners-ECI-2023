@@ -1,2 +1,2 @@
-# AlixPartners-ECI-2023
-Propuesta para la competencia AlixPartners ECI 2023: (Des)Control de gastos en servicios profesionales.
+#     MachineReadable-OCR-Test
+Prueba de PDFs machine readable y OCR (optical character recognition) por medio de Pytesseract.
